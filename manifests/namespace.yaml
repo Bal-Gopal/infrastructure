@@ -1,20 +1,6 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+apiVersion: v1
+kind: Namespace
 metadata:
-  name: infrastructure
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: "https://github.com/Bal-Gopal/infrastructure.git"
-    path: "k8s"
-    targetRevision: master
-  destination:
-    server: "https://kubernetes.default.svc"
-    namespace: myapp
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
+  name: myapp
+  labels:
+    app: myapp
