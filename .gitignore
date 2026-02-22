@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+
+.terraform/
+.terragrunt-cache/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
