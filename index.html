@@ -99,10 +99,6 @@
       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
       background: #020617;
     }
-    .field input::placeholder,
-    .field textarea::placeholder {
-      color: #4b5563;
-    }
     .switch-row {
       display: flex;
       gap: 1rem;
@@ -152,9 +148,6 @@
       transform: translateX(12px);
       background: #e5e7eb;
     }
-    .switch span {
-      color: #e5e7eb;
-    }
     .btn-row {
       display: flex;
       gap: 0.75rem;
@@ -190,14 +183,11 @@
     .btn:active {
       transform: translateY(0);
     }
-    .btn-icon {
-      font-size: 1rem;
-    }
     textarea#output {
       width: 100%;
       min-height: 420px;
       resize: vertical;
-      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: "JetBrains Mono", monospace;
       font-size: 0.8rem;
       line-height: 1.4;
       background: #020617;
@@ -207,41 +197,26 @@
       color: #e5e7eb;
       box-sizing: border-box;
     }
-    .hint {
-      font-size: 0.75rem;
-      color: #6b7280;
-      margin-top: 0.25rem;
-    }
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-      margin-top: 0.25rem;
-    }
-    .tag {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.45rem;
-      border-radius: 999px;
-      border: 1px solid #1f2937;
-      color: #9ca3af;
-      background: #020617;
-    }
   </style>
 </head>
 <body>
   <header>
     <h1>Kubernetes YAML Builder</h1>
-    <p>Fill in the fields, toggle which resources you want, and generate Deployment / Service / Ingress YAML.</p>
+    <p>Fill in the fields, toggle resources, and generate Deployment / Service / Ingress / Namespace YAML.</p>
   </header>
 
   <main>
-    <!-- LEFT: FORM -->
+    <!-- LEFT SIDE -->
     <section class="card">
       <h2>Inputs</h2>
-      <p>Core fields are shared across resources. Use the switches to include or exclude each type.</p>
 
       <div class="section-title">Resources</div>
       <div class="switch-row">
+        <label class="switch">
+          <input type="checkbox" id="enableNamespace" checked />
+          <span class="switch-pill"></span>
+          <span>Namespace</span>
+        </label>
         <label class="switch">
           <input type="checkbox" id="enableDeployment" checked />
           <span class="switch-pill"></span>
@@ -263,54 +238,54 @@
       <div class="grid-2">
         <div class="field">
           <label for="name">Name</label>
-          <input id="name" type="text" placeholder="my-app" value="my-app" />
+          <input id="name" type="text" value="my-app" />
         </div>
         <div class="field">
           <label for="namespace">Namespace</label>
-          <input id="namespace" type="text" placeholder="default" value="default" />
+          <input id="namespace" type="text" value="default" />
         </div>
       </div>
 
       <div class="section-title">Deployment</div>
       <div class="grid-2">
         <div class="field">
-          <label for="image">Container image</label>
-          <input id="image" type="text" placeholder="nginx:1.27" value="nginx:1.27" />
+          <label for="image">Image</label>
+          <input id="image" type="text" value="nginx:1.27" />
         </div>
         <div class="field">
           <label for="replicas">Replicas</label>
-          <input id="replicas" type="number" min="1" value="1" />
+          <input id="replicas" type="number" value="1" />
         </div>
       </div>
 
       <div class="grid-2">
         <div class="field">
           <label for="containerPort">Container port</label>
-          <input id="containerPort" type="number" min="1" max="65535" value="80" />
+          <input id="containerPort" type="number" value="80" />
         </div>
         <div class="field">
-          <label for="env">Environment variables (KEY=VALUE, one per line)</label>
-          <textarea id="env" rows="3" placeholder="ENV=prod&#10;LOG_LEVEL=info"></textarea>
+          <label for="env">Environment variables</label>
+          <textarea id="env" rows="3"></textarea>
         </div>
       </div>
 
       <div class="section-title">Service</div>
       <div class="grid-3">
         <div class="field">
-          <label for="serviceType">Service type</label>
+          <label for="serviceType">Type</label>
           <select id="serviceType">
-            <option value="ClusterIP">ClusterIP</option>
-            <option value="NodePort">NodePort</option>
-            <option value="LoadBalancer">LoadBalancer</option>
+            <option>ClusterIP</option>
+            <option>NodePort</option>
+            <option>LoadBalancer</option>
           </select>
         </div>
         <div class="field">
-          <label for="servicePort">Service port</label>
-          <input id="servicePort" type="number" min="1" max="65535" value="80" />
+          <label for="servicePort">Port</label>
+          <input id="servicePort" type="number" value="80" />
         </div>
         <div class="field">
           <label for="targetPort">Target port</label>
-          <input id="targetPort" type="number" min="1" max="65535" value="80" />
+          <input id="targetPort" type="number" value="80" />
         </div>
       </div>
 
@@ -318,7 +293,7 @@
       <div class="grid-2">
         <div class="field">
           <label for="ingressHost">Host</label>
-          <input id="ingressHost" type="text" placeholder="app.example.com" />
+          <input id="ingressHost" type="text" />
         </div>
         <div class="field">
           <label for="ingressPath">Path</label>
@@ -328,253 +303,157 @@
 
       <div class="grid-2">
         <div class="field">
-          <label for="ingressClassName">Ingress class name</label>
+          <label for="ingressClassName">Ingress class</label>
           <input id="ingressClassName" type="text" placeholder="traefik" />
         </div>
         <div class="field">
-          <label for="tlsSecretName">TLS secret name (optional)</label>
-          <input id="tlsSecretName" type="text" placeholder="my-app-tls" />
+          <label for="tlsSecretName">TLS secret</label>
+          <input id="tlsSecretName" type="text" />
         </div>
       </div>
 
-      <div class="hint">
-        Ingress will route to the generated Service using <code>servicePort</code>. TLS is added only if a secret name is set.
-      </div>
-
       <div class="btn-row">
-        <button class="btn btn-primary" id="generateBtn">
-          <span class="btn-icon">⚙️</span>
-          <span>Generate YAML</span>
-        </button>
-        <button class="btn" id="copyBtn">
-          <span class="btn-icon">📋</span>
-          <span>Copy</span>
-        </button>
-        <button class="btn" id="clearBtn">
-          <span class="btn-icon">🧹</span>
-          <span>Clear output</span>
-        </button>
-      </div>
-
-      <div class="tag-row">
-        <span class="tag">Deployment</span>
-        <span class="tag">Service</span>
-        <span class="tag">Ingress</span>
-        <span class="tag">Static HTML</span>
+        <button class="btn btn-primary" id="generateBtn">⚙️ Generate YAML</button>
+        <button class="btn" id="copyBtn">📋 Copy</button>
+        <button class="btn" id="clearBtn">🧹 Clear</button>
       </div>
     </section>
 
-    <!-- RIGHT: OUTPUT -->
+    <!-- RIGHT SIDE -->
     <section class="card">
-      <h2>YAML output</h2>
-      <p>Generated manifests appear here. You can paste them directly into your GitOps repo or apply them with <code>kubectl</code>.</p>
-      <textarea id="output" spellcheck="false" placeholder="# Click “Generate YAML” to see your manifests here."></textarea>
+      <h2>YAML Output</h2>
+      <textarea id="output" spellcheck="false" placeholder="# Click Generate YAML"></textarea>
     </section>
   </main>
 
   <script>
-    function indent(level) {
-      return "  ".repeat(level);
+    function indent(n) { return "  ".repeat(n); }
+
+    function buildNamespace(ns) {
+      return (
+`apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${ns}
+  labels:
+    app: ${ns}
+    app.kubernetes.io/name: ${ns}
+    app.kubernetes.io/part-of: ${ns}`
+      );
     }
 
-    function parseEnv(envText) {
-      const lines = envText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      return lines.map(line => {
-        const idx = line.indexOf("=");
-        if (idx === -1) {
-          return { name: line, value: "" };
-        }
-        return {
-          name: line.slice(0, idx).trim(),
-          value: line.slice(idx + 1).trim()
-        };
-      });
+    function buildDeployment(v) {
+      return (
+`apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${v.name}
+  namespace: ${v.namespace}
+  labels:
+    app: ${v.name}
+spec:
+  replicas: ${v.replicas}
+  selector:
+    matchLabels:
+      app: ${v.name}
+  template:
+    metadata:
+      labels:
+        app: ${v.name}
+    spec:
+      containers:
+      - name: ${v.name}
+        image: ${v.image}
+        ports:
+        - containerPort: ${v.containerPort}`
+      );
     }
 
-    function buildDeployment(values) {
-      const {
-        name,
-        namespace,
-        image,
-        replicas,
-        containerPort,
-        envText
-      } = values;
-
-      const envVars = parseEnv(envText);
-      let yaml = "";
-      yaml += "apiVersion: apps/v1\n";
-      yaml += "kind: Deployment\n";
-      yaml += "metadata:\n";
-      yaml += indent(1) + "name: " + name + "\n";
-      if (namespace) {
-        yaml += indent(1) + "namespace: " + namespace + "\n";
-      }
-      yaml += indent(1) + "labels:\n";
-      yaml += indent(2) + "app: " + name + "\n";
-      yaml += "spec:\n";
-      yaml += indent(1) + "replicas: " + replicas + "\n";
-      yaml += indent(1) + "selector:\n";
-      yaml += indent(2) + "matchLabels:\n";
-      yaml += indent(3) + "app: " + name + "\n";
-      yaml += indent(1) + "template:\n";
-      yaml += indent(2) + "metadata:\n";
-      yaml += indent(3) + "labels:\n";
-      yaml += indent(4) + "app: " + name + "\n";
-      yaml += indent(2) + "spec:\n";
-      yaml += indent(3) + "containers:\n";
-      yaml += indent(4) + "- name: " + name + "\n";
-      yaml += indent(5) + "image: " + image + "\n";
-      yaml += indent(5) + "ports:\n";
-      yaml += indent(6) + "- containerPort: " + containerPort + "\n";
-
-      if (envVars.length > 0) {
-        yaml += indent(5) + "env:\n";
-        envVars.forEach(e => {
-          yaml += indent(6) + "- name: " + e.name + "\n";
-          yaml += indent(7) + "value: \"" + e.value.replace(/"/g, '\\"') + "\"\n";
-        });
-      }
-
-      return yaml;
+    function buildService(v) {
+      return (
+`apiVersion: v1
+kind: Service
+metadata:
+  name: ${v.name}
+  namespace: ${v.namespace}
+  labels:
+    app: ${v.name}
+spec:
+  type: ${v.serviceType}
+  selector:
+    app: ${v.name}
+  ports:
+  - port: ${v.servicePort}
+    targetPort: ${v.targetPort}`
+      );
     }
 
-    function buildService(values) {
-      const {
-        name,
-        namespace,
-        serviceType,
-        servicePort,
-        targetPort
-      } = values;
-
-      let yaml = "";
-      yaml += "apiVersion: v1\n";
-      yaml += "kind: Service\n";
-      yaml += "metadata:\n";
-      yaml += indent(1) + "name: " + name + "\n";
-      if (namespace) {
-        yaml += indent(1) + "namespace: " + namespace + "\n";
-      }
-      yaml += indent(1) + "labels:\n";
-      yaml += indent(2) + "app: " + name + "\n";
-      yaml += "spec:\n";
-      yaml += indent(1) + "type: " + serviceType + "\n";
-      yaml += indent(1) + "selector:\n";
-      yaml += indent(2) + "app: " + name + "\n";
-      yaml += indent(1) + "ports:\n";
-      yaml += indent(2) + "- port: " + servicePort + "\n";
-      yaml += indent(3) + "targetPort: " + targetPort + "\n";
-
-      if (serviceType === "NodePort") {
-        yaml += indent(3) + "# nodePort: 30080  # optional, uncomment to pin\n";
-      }
-
-      return yaml;
+    function buildIngress(v) {
+      return (
+`apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${v.name}
+  namespace: ${v.namespace}
+spec:
+  ingressClassName: ${v.ingressClassName || "traefik"}
+  rules:
+  - host: ${v.ingressHost}
+    http:
+      paths:
+      - path: ${v.ingressPath}
+        pathType: Prefix
+        backend:
+          service:
+            name: ${v.name}
+            port:
+              number: ${v.servicePort}`
+      );
     }
 
-    function buildIngress(values) {
-      const {
-        name,
-        namespace,
-        ingressHost,
-        ingressPath,
-        ingressClassName,
-        tlsSecretName,
-        servicePort
-      } = values;
-
-      let yaml = "";
-      yaml += "apiVersion: networking.k8s.io/v1\n";
-      yaml += "kind: Ingress\n";
-      yaml += "metadata:\n";
-      yaml += indent(1) + "name: " + name + "\n";
-      if (namespace) {
-        yaml += indent(1) + "namespace: " + namespace + "\n";
-      }
-      yaml += indent(1) + "annotations:\n";
-      yaml += indent(2) + "# traefik.ingress.kubernetes.io/router.entrypoints: websecure\n";
-      yaml += "spec:\n";
-      if (ingressClassName) {
-        yaml += indent(1) + "ingressClassName: " + ingressClassName + "\n";
-      }
-      if (tlsSecretName && ingressHost) {
-        yaml += indent(1) + "tls:\n";
-        yaml += indent(2) + "- hosts:\n";
-        yaml += indent(3) + "- " + ingressHost + "\n";
-        yaml += indent(3) + "secretName: " + tlsSecretName + "\n";
-      }
-      yaml += indent(1) + "rules:\n";
-      yaml += indent(2) + "- host: " + (ingressHost || "example.com") + "\n";
-      yaml += indent(3) + "http:\n";
-      yaml += indent(4) + "paths:\n";
-      yaml += indent(5) + "- path: " + (ingressPath || "/") + "\n";
-      yaml += indent(6) + "pathType: Prefix\n";
-      yaml += indent(6) + "backend:\n";
-      yaml += indent(7) + "service:\n";
-      yaml += indent(8) + "name: " + name + "\n";
-      yaml += indent(8) + "port:\n";
-      yaml += indent(9) + "number: " + servicePort + "\n";
-
-      return yaml;
-    }
-
-    function collectValues() {
-      return {
+    document.getElementById("generateBtn").onclick = () => {
+      const v = {
+        enableNamespace: document.getElementById("enableNamespace").checked,
         enableDeployment: document.getElementById("enableDeployment").checked,
         enableService: document.getElementById("enableService").checked,
         enableIngress: document.getElementById("enableIngress").checked,
-        name: document.getElementById("name").value.trim() || "my-app",
-        namespace: document.getElementById("namespace").value.trim(),
-        image: document.getElementById("image").value.trim() || "nginx:latest",
-        replicas: parseInt(document.getElementById("replicas").value, 10) || 1,
-        containerPort: parseInt(document.getElementById("containerPort").value, 10) || 80,
-        envText: document.getElementById("env").value,
+        name: document.getElementById("name").value,
+        namespace: document.getElementById("namespace").value,
+        image: document.getElementById("image").value,
+        replicas: document.getElementById("replicas").value,
+        containerPort: document.getElementById("containerPort").value,
         serviceType: document.getElementById("serviceType").value,
-        servicePort: parseInt(document.getElementById("servicePort").value, 10) || 80,
-        targetPort: parseInt(document.getElementById("targetPort").value, 10) || 80,
-        ingressHost: document.getElementById("ingressHost").value.trim(),
-        ingressPath: document.getElementById("ingressPath").value.trim() || "/",
-        ingressClassName: document.getElementById("ingressClassName").value.trim(),
-        tlsSecretName: document.getElementById("tlsSecretName").value.trim()
+        servicePort: document.getElementById("servicePort").value,
+        targetPort: document.getElementById("targetPort").value,
+        ingressHost: document.getElementById("ingressHost").value,
+        ingressPath: document.getElementById("ingressPath").value,
+        ingressClassName: document.getElementById("ingressClassName").value,
+        tlsSecretName: document.getElementById("tlsSecretName").value
       };
-    }
 
-    document.getElementById("generateBtn").addEventListener("click", () => {
-      const v = collectValues();
-      const parts = [];
+      const out = [];
 
-      if (v.enableDeployment) {
-        parts.push(buildDeployment(v));
-      }
-      if (v.enableService) {
-        parts.push(buildService(v));
-      }
-      if (v.enableIngress) {
-        parts.push(buildIngress(v));
-      }
+      if (v.enableNamespace) out.push(buildNamespace(v.namespace));
+      if (v.enableDeployment) out.push(buildDeployment(v));
+      if (v.enableService) out.push(buildService(v));
+      if (v.enableIngress) out.push(buildIngress(v));
 
-      const output = parts.join("\n---\n\n");
-      document.getElementById("output").value = output || "# No resources selected. Enable at least one switch.";
-    });
+      document.getElementById("output").value = out.join("\n---\n\n");
+    };
 
-    document.getElementById("copyBtn").addEventListener("click", async () => {
+    document.getElementById("copyBtn").onclick = async () => {
       const text = document.getElementById("output").value;
       if (!text.trim()) return;
-      try {
-        await navigator.clipboard.writeText(text);
-        const btn = document.getElementById("copyBtn");
-        const original = btn.innerText;
-        btn.innerText = "Copied!";
-        setTimeout(() => (btn.innerText = original), 1200);
-      } catch (e) {
-        alert("Could not copy to clipboard in this browser.");
-      }
-    });
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copyBtn");
+      const old = btn.innerText;
+      btn.innerText = "Copied!";
+      setTimeout(() => btn.innerText = old, 1200);
+    };
 
-    document.getElementById("clearBtn").addEventListener("click", () => {
+    document.getElementById("clearBtn").onclick = () => {
       document.getElementById("output").value = "";
-    });
+    };
   </script>
 </body>
 </html>
