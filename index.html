@@ -1,226 +1,580 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Kubernetes Manifest Builder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
+  <meta charset="UTF-8" />
+  <title>Kubernetes YAML Builder</title>
+  <style>
     body {
-        margin: 0;
-        font-family: "Segoe UI", sans-serif;
-        background: #0f1117;
-        color: #e6e6e6;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #e5e7eb;
     }
-
     header {
-        background: #1a1d27;
-        padding: 20px;
-        text-align: center;
-        font-size: 28px;
-        font-weight: bold;
-        border-bottom: 2px solid #2a2f3d;
+      padding: 1.5rem 2rem;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
     }
-
-    .container {
-        max-width: 900px;
-        margin: 30px auto;
-        background: #1a1d27;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
     }
-
-    h2 {
-        margin-top: 0;
-        color: #7ab0ff;
+    header p {
+      margin: 0.25rem 0 0;
+      font-size: 0.9rem;
+      color: #9ca3af;
     }
-
-    label {
-        display: block;
-        margin-top: 15px;
-        font-weight: bold;
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.5fr);
+      gap: 1.5rem;
+      padding: 1.5rem 2rem 2rem;
     }
-
-    input, select {
-        width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border-radius: 6px;
-        border: 1px solid #3a3f52;
-        background: #0f1117;
-        color: #e6e6e6;
-        font-size: 15px;
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
     }
-
-    .checkbox-group {
-        margin-top: 20px;
-        padding: 15px;
-        border: 1px solid #3a3f52;
-        border-radius: 8px;
+    .card {
+      background: #020617;
+      border-radius: 0.75rem;
+      border: 1px solid #1f2937;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.8);
     }
-
-    .checkbox-group label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 10px;
-        font-weight: normal;
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
     }
-
-    button {
-        margin-top: 25px;
-        width: 100%;
-        padding: 14px;
-        background: #4c8dff;
-        border: none;
-        border-radius: 6px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        color: white;
+    .card p {
+      margin: 0 0 1rem;
+      font-size: 0.85rem;
+      color: #9ca3af;
     }
-
-    button:hover {
-        background: #3b74d6;
+    .section-title {
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
     }
-
-    #output {
-        margin-top: 30px;
-        white-space: pre-wrap;
-        background: #0f1117;
-        border: 1px solid #3a3f52;
-        padding: 20px;
-        border-radius: 8px;
-        font-family: Consolas, monospace;
-        font-size: 14px;
-        overflow-x: auto;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem 1rem;
     }
-</style>
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem 1rem;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .field label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      background: #020617;
+      border-radius: 0.5rem;
+      border: 1px solid #1f2937;
+      padding: 0.45rem 0.6rem;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      background: #020617;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: #4b5563;
+    }
+    .switch-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      cursor: pointer;
+      user-select: none;
+    }
+    .switch input {
+      display: none;
+    }
+    .switch-pill {
+      width: 30px;
+      height: 16px;
+      border-radius: 999px;
+      background: #111827;
+      border: 1px solid #374151;
+      position: relative;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .switch-pill::after {
+      content: "";
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #6b7280;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .switch input:checked + .switch-pill {
+      background: #0369a1;
+      border-color: #0ea5e9;
+    }
+    .switch input:checked + .switch-pill::after {
+      transform: translateX(12px);
+      background: #e5e7eb;
+    }
+    .switch span {
+      color: #e5e7eb;
+    }
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: #0b1120;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
+      border-color: #22c55e;
+      color: #020617;
+      font-weight: 500;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: #4b5563;
+    }
+    .btn-primary:hover {
+      border-color: #bbf7d0;
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .btn-icon {
+      font-size: 1rem;
+    }
+    textarea#output {
+      width: 100%;
+      min-height: 420px;
+      resize: vertical;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      background: #020617;
+      border-radius: 0.75rem;
+      border: 1px solid #1f2937;
+      padding: 0.75rem 0.9rem;
+      color: #e5e7eb;
+      box-sizing: border-box;
+    }
+    .hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      color: #9ca3af;
+      background: #020617;
+    }
+  </style>
 </head>
-
 <body>
+  <header>
+    <h1>Kubernetes YAML Builder</h1>
+    <p>Fill in the fields, toggle which resources you want, and generate Deployment / Service / Ingress YAML.</p>
+  </header>
 
-<header>Kubernetes Manifest Builder</header>
+  <main>
+    <!-- LEFT: FORM -->
+    <section class="card">
+      <h2>Inputs</h2>
+      <p>Core fields are shared across resources. Use the switches to include or exclude each type.</p>
 
-<div class="container">
+      <div class="section-title">Resources</div>
+      <div class="switch-row">
+        <label class="switch">
+          <input type="checkbox" id="enableDeployment" checked />
+          <span class="switch-pill"></span>
+          <span>Deployment</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="enableService" checked />
+          <span class="switch-pill"></span>
+          <span>Service</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="enableIngress" checked />
+          <span class="switch-pill"></span>
+          <span>Ingress</span>
+        </label>
+      </div>
 
-    <h2>Resources to Generate</h2>
-    <div class="checkbox-group">
-        <label><input type="checkbox" id="genDeployment" checked> Deployment</label>
-        <label><input type="checkbox" id="genService" checked> Service</label>
-        <label><input type="checkbox" id="genIngress"> IngressRoute (Traefik)</label>
-    </div>
+      <div class="section-title">Core</div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="my-app" value="my-app" />
+        </div>
+        <div class="field">
+          <label for="namespace">Namespace</label>
+          <input id="namespace" type="text" placeholder="default" value="default" />
+        </div>
+      </div>
 
-    <h2>Deployment Settings</h2>
+      <div class="section-title">Deployment</div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="image">Container image</label>
+          <input id="image" type="text" placeholder="nginx:1.27" value="nginx:1.27" />
+        </div>
+        <div class="field">
+          <label for="replicas">Replicas</label>
+          <input id="replicas" type="number" min="1" value="1" />
+        </div>
+      </div>
 
-    <label>App Name</label>
-    <input id="appName" placeholder="my-app">
+      <div class="grid-2">
+        <div class="field">
+          <label for="containerPort">Container port</label>
+          <input id="containerPort" type="number" min="1" max="65535" value="80" />
+        </div>
+        <div class="field">
+          <label for="env">Environment variables (KEY=VALUE, one per line)</label>
+          <textarea id="env" rows="3" placeholder="ENV=prod&#10;LOG_LEVEL=info"></textarea>
+        </div>
+      </div>
 
-    <label>Container Image</label>
-    <input id="image" placeholder="nginx:latest">
+      <div class="section-title">Service</div>
+      <div class="grid-3">
+        <div class="field">
+          <label for="serviceType">Service type</label>
+          <select id="serviceType">
+            <option value="ClusterIP">ClusterIP</option>
+            <option value="NodePort">NodePort</option>
+            <option value="LoadBalancer">LoadBalancer</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="servicePort">Service port</label>
+          <input id="servicePort" type="number" min="1" max="65535" value="80" />
+        </div>
+        <div class="field">
+          <label for="targetPort">Target port</label>
+          <input id="targetPort" type="number" min="1" max="65535" value="80" />
+        </div>
+      </div>
 
-    <label>Replicas</label>
-    <input id="replicas" type="number" value="1">
+      <div class="section-title">Ingress</div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="ingressHost">Host</label>
+          <input id="ingressHost" type="text" placeholder="app.example.com" />
+        </div>
+        <div class="field">
+          <label for="ingressPath">Path</label>
+          <input id="ingressPath" type="text" value="/" />
+        </div>
+      </div>
 
-    <label>Container Port</label>
-    <input id="port" type="number" value="80">
+      <div class="grid-2">
+        <div class="field">
+          <label for="ingressClassName">Ingress class name</label>
+          <input id="ingressClassName" type="text" placeholder="traefik" />
+        </div>
+        <div class="field">
+          <label for="tlsSecretName">TLS secret name (optional)</label>
+          <input id="tlsSecretName" type="text" placeholder="my-app-tls" />
+        </div>
+      </div>
 
-    <h2>IngressRoute Settings</h2>
+      <div class="hint">
+        Ingress will route to the generated Service using <code>servicePort</code>. TLS is added only if a secret name is set.
+      </div>
 
-    <label>Hostname</label>
-    <input id="host" placeholder="example.local">
+      <div class="btn-row">
+        <button class="btn btn-primary" id="generateBtn">
+          <span class="btn-icon">⚙️</span>
+          <span>Generate YAML</span>
+        </button>
+        <button class="btn" id="copyBtn">
+          <span class="btn-icon">📋</span>
+          <span>Copy</span>
+        </button>
+        <button class="btn" id="clearBtn">
+          <span class="btn-icon">🧹</span>
+          <span>Clear output</span>
+        </button>
+      </div>
 
-    <label>EntryPoint</label>
-    <select id="entrypoint">
-        <option>web</option>
-        <option>websecure</option>
-    </select>
+      <div class="tag-row">
+        <span class="tag">Deployment</span>
+        <span class="tag">Service</span>
+        <span class="tag">Ingress</span>
+        <span class="tag">Static HTML</span>
+      </div>
+    </section>
 
-    <button onclick="generateYAML()">Generate YAML</button>
+    <!-- RIGHT: OUTPUT -->
+    <section class="card">
+      <h2>YAML output</h2>
+      <p>Generated manifests appear here. You can paste them directly into your GitOps repo or apply them with <code>kubectl</code>.</p>
+      <textarea id="output" spellcheck="false" placeholder="# Click “Generate YAML” to see your manifests here."></textarea>
+    </section>
+  </main>
 
-    <h2>Generated YAML</h2>
-    <div id="output">Your YAML will appear here...</div>
-</div>
-
-<script>
-function generateYAML() {
-    const app = document.getElementById("appName").value || "my-app";
-    const image = document.getElementById("image").value || "nginx:latest";
-    const replicas = document.getElementById("replicas").value || 1;
-    const port = document.getElementById("port").value || 80;
-
-    const host = document.getElementById("host").value || "example.local";
-    const entrypoint = document.getElementById("entrypoint").value;
-
-    let output = "";
-
-    // Deployment
-    if (document.getElementById("genDeployment").checked) {
-        output += `
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ${app}
-spec:
-  replicas: ${replicas}
-  selector:
-    matchLabels:
-      app: ${app}
-  template:
-    metadata:
-      labels:
-        app: ${app}
-    spec:
-      containers:
-      - name: ${app}
-        image: ${image}
-        ports:
-        - containerPort: ${port}
-`;
+  <script>
+    function indent(level) {
+      return "  ".repeat(level);
     }
 
-    // Service
-    if (document.getElementById("genService").checked) {
-        output += `
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${app}-service
-spec:
-  type: ClusterIP
-  selector:
-    app: ${app}
-  ports:
-  - port: ${port}
-    targetPort: ${port}
-`;
+    function parseEnv(envText) {
+      const lines = envText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      return lines.map(line => {
+        const idx = line.indexOf("=");
+        if (idx === -1) {
+          return { name: line, value: "" };
+        }
+        return {
+          name: line.slice(0, idx).trim(),
+          value: line.slice(idx + 1).trim()
+        };
+      });
     }
 
-    // IngressRoute (Traefik)
-    if (document.getElementById("genIngress").checked) {
-        output += `
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: ${app}-ingress
-spec:
-  entryPoints:
-    - ${entrypoint}
-  routes:
-  - match: Host(\`${host}\`)
-    kind: Rule
-    services:
-    - name: ${app}-service
-      port: ${port}
-`;
+    function buildDeployment(values) {
+      const {
+        name,
+        namespace,
+        image,
+        replicas,
+        containerPort,
+        envText
+      } = values;
+
+      const envVars = parseEnv(envText);
+      let yaml = "";
+      yaml += "apiVersion: apps/v1\n";
+      yaml += "kind: Deployment\n";
+      yaml += "metadata:\n";
+      yaml += indent(1) + "name: " + name + "\n";
+      if (namespace) {
+        yaml += indent(1) + "namespace: " + namespace + "\n";
+      }
+      yaml += indent(1) + "labels:\n";
+      yaml += indent(2) + "app: " + name + "\n";
+      yaml += "spec:\n";
+      yaml += indent(1) + "replicas: " + replicas + "\n";
+      yaml += indent(1) + "selector:\n";
+      yaml += indent(2) + "matchLabels:\n";
+      yaml += indent(3) + "app: " + name + "\n";
+      yaml += indent(1) + "template:\n";
+      yaml += indent(2) + "metadata:\n";
+      yaml += indent(3) + "labels:\n";
+      yaml += indent(4) + "app: " + name + "\n";
+      yaml += indent(2) + "spec:\n";
+      yaml += indent(3) + "containers:\n";
+      yaml += indent(4) + "- name: " + name + "\n";
+      yaml += indent(5) + "image: " + image + "\n";
+      yaml += indent(5) + "ports:\n";
+      yaml += indent(6) + "- containerPort: " + containerPort + "\n";
+
+      if (envVars.length > 0) {
+        yaml += indent(5) + "env:\n";
+        envVars.forEach(e => {
+          yaml += indent(6) + "- name: " + e.name + "\n";
+          yaml += indent(7) + "value: \"" + e.value.replace(/"/g, '\\"') + "\"\n";
+        });
+      }
+
+      return yaml;
     }
 
-    document.getElementById("output").textContent = output.trim();
-}
-</script>
+    function buildService(values) {
+      const {
+        name,
+        namespace,
+        serviceType,
+        servicePort,
+        targetPort
+      } = values;
 
+      let yaml = "";
+      yaml += "apiVersion: v1\n";
+      yaml += "kind: Service\n";
+      yaml += "metadata:\n";
+      yaml += indent(1) + "name: " + name + "\n";
+      if (namespace) {
+        yaml += indent(1) + "namespace: " + namespace + "\n";
+      }
+      yaml += indent(1) + "labels:\n";
+      yaml += indent(2) + "app: " + name + "\n";
+      yaml += "spec:\n";
+      yaml += indent(1) + "type: " + serviceType + "\n";
+      yaml += indent(1) + "selector:\n";
+      yaml += indent(2) + "app: " + name + "\n";
+      yaml += indent(1) + "ports:\n";
+      yaml += indent(2) + "- port: " + servicePort + "\n";
+      yaml += indent(3) + "targetPort: " + targetPort + "\n";
+
+      if (serviceType === "NodePort") {
+        yaml += indent(3) + "# nodePort: 30080  # optional, uncomment to pin\n";
+      }
+
+      return yaml;
+    }
+
+    function buildIngress(values) {
+      const {
+        name,
+        namespace,
+        ingressHost,
+        ingressPath,
+        ingressClassName,
+        tlsSecretName,
+        servicePort
+      } = values;
+
+      let yaml = "";
+      yaml += "apiVersion: networking.k8s.io/v1\n";
+      yaml += "kind: Ingress\n";
+      yaml += "metadata:\n";
+      yaml += indent(1) + "name: " + name + "\n";
+      if (namespace) {
+        yaml += indent(1) + "namespace: " + namespace + "\n";
+      }
+      yaml += indent(1) + "annotations:\n";
+      yaml += indent(2) + "# traefik.ingress.kubernetes.io/router.entrypoints: websecure\n";
+      yaml += "spec:\n";
+      if (ingressClassName) {
+        yaml += indent(1) + "ingressClassName: " + ingressClassName + "\n";
+      }
+      if (tlsSecretName && ingressHost) {
+        yaml += indent(1) + "tls:\n";
+        yaml += indent(2) + "- hosts:\n";
+        yaml += indent(3) + "- " + ingressHost + "\n";
+        yaml += indent(3) + "secretName: " + tlsSecretName + "\n";
+      }
+      yaml += indent(1) + "rules:\n";
+      yaml += indent(2) + "- host: " + (ingressHost || "example.com") + "\n";
+      yaml += indent(3) + "http:\n";
+      yaml += indent(4) + "paths:\n";
+      yaml += indent(5) + "- path: " + (ingressPath || "/") + "\n";
+      yaml += indent(6) + "pathType: Prefix\n";
+      yaml += indent(6) + "backend:\n";
+      yaml += indent(7) + "service:\n";
+      yaml += indent(8) + "name: " + name + "\n";
+      yaml += indent(8) + "port:\n";
+      yaml += indent(9) + "number: " + servicePort + "\n";
+
+      return yaml;
+    }
+
+    function collectValues() {
+      return {
+        enableDeployment: document.getElementById("enableDeployment").checked,
+        enableService: document.getElementById("enableService").checked,
+        enableIngress: document.getElementById("enableIngress").checked,
+        name: document.getElementById("name").value.trim() || "my-app",
+        namespace: document.getElementById("namespace").value.trim(),
+        image: document.getElementById("image").value.trim() || "nginx:latest",
+        replicas: parseInt(document.getElementById("replicas").value, 10) || 1,
+        containerPort: parseInt(document.getElementById("containerPort").value, 10) || 80,
+        envText: document.getElementById("env").value,
+        serviceType: document.getElementById("serviceType").value,
+        servicePort: parseInt(document.getElementById("servicePort").value, 10) || 80,
+        targetPort: parseInt(document.getElementById("targetPort").value, 10) || 80,
+        ingressHost: document.getElementById("ingressHost").value.trim(),
+        ingressPath: document.getElementById("ingressPath").value.trim() || "/",
+        ingressClassName: document.getElementById("ingressClassName").value.trim(),
+        tlsSecretName: document.getElementById("tlsSecretName").value.trim()
+      };
+    }
+
+    document.getElementById("generateBtn").addEventListener("click", () => {
+      const v = collectValues();
+      const parts = [];
+
+      if (v.enableDeployment) {
+        parts.push(buildDeployment(v));
+      }
+      if (v.enableService) {
+        parts.push(buildService(v));
+      }
+      if (v.enableIngress) {
+        parts.push(buildIngress(v));
+      }
+
+      const output = parts.join("\n---\n\n");
+      document.getElementById("output").value = output || "# No resources selected. Enable at least one switch.";
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const text = document.getElementById("output").value;
+      if (!text.trim()) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById("copyBtn");
+        const original = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => (btn.innerText = original), 1200);
+      } catch (e) {
+        alert("Could not copy to clipboard in this browser.");
+      }
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      document.getElementById("output").value = "";
+    });
+  </script>
 </body>
 </html>
