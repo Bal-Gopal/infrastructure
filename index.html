@@ -1,13 +1,169 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>My Web Page</title>
-    </head>
-    <body>
-        <h1>Welcome to My Web Page</h1>
-        <p>This is a simple HTML page.</p>
-    </body>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kubernetes Manifest Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: #0f1117;
+        color: #e6e6e6;
+    }
+
+    header {
+        background: #1a1d27;
+        padding: 20px;
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        border-bottom: 2px solid #2a2f3d;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: #1a1d27;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #7ab0ff;
+    }
+
+    label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 6px;
+        border: 1px solid #3a3f52;
+        background: #0f1117;
+        color: #e6e6e6;
+        font-size: 15px;
+    }
+
+    button {
+        margin-top: 25px;
+        width: 100%;
+        padding: 14px;
+        background: #4c8dff;
+        border: none;
+        border-radius: 6px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+    }
+
+    button:hover {
+        background: #3b74d6;
+    }
+
+    #output {
+        margin-top: 30px;
+        white-space: pre-wrap;
+        background: #0f1117;
+        border: 1px solid #3a3f52;
+        padding: 20px;
+        border-radius: 8px;
+        font-family: Consolas, monospace;
+        font-size: 14px;
+        overflow-x: auto;
+    }
+</style>
+</head>
+
+<body>
+
+<header>Kubernetes Manifest Builder</header>
+
+<div class="container">
+    <h2>Deployment Settings</h2>
+
+    <label>App Name</label>
+    <input id="appName" placeholder="my-app">
+
+    <label>Container Image</label>
+    <input id="image" placeholder="nginx:latest">
+
+    <label>Replicas</label>
+    <input id="replicas" type="number" value="1">
+
+    <label>Container Port</label>
+    <input id="port" type="number" value="80">
+
+    <h2>Service Settings</h2>
+
+    <label>Service Type</label>
+    <select id="serviceType">
+        <option>ClusterIP</option>
+        <option>NodePort</option>
+        <option>LoadBalancer</option>
+    </select>
+
+    <button onclick="generateYAML()">Generate YAML</button>
+
+    <h2>Generated YAML</h2>
+    <div id="output">Your YAML will appear here...</div>
+</div>
+
+<script>
+function generateYAML() {
+    const app = document.getElementById("appName").value || "my-app";
+    const image = document.getElementById("image").value || "nginx:latest";
+    const replicas = document.getElementById("replicas").value || 1;
+    const port = document.getElementById("port").value || 80;
+    const serviceType = document.getElementById("serviceType").value;
+
+    const yaml = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${app}
+spec:
+  replicas: ${replicas}
+  selector:
+    matchLabels:
+      app: ${app}
+  template:
+    metadata:
+      labels:
+        app: ${app}
+    spec:
+      containers:
+      - name: ${app}
+        image: ${image}
+        ports:
+        - containerPort: ${port}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${app}-service
+spec:
+  type: ${serviceType}
+  selector:
+    app: ${app}
+  ports:
+  - port: ${port}
+    targetPort: ${port}
+`;
+
+    document.getElementById("output").textContent = yaml.trim();
+}
+</script>
+
+</body>
 </html>
-
-
